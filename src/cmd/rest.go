@@ -76,6 +76,27 @@ func restServer(_ *cobra.Command, _ []string) {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
+	// Debug middleware for reverse proxy header inspection (Zeabur, etc.)
+	app.Use(func(c *fiber.Ctx) error {
+		if config.AppDebug {
+			logrus.WithFields(logrus.Fields{
+				"protocol":                 c.Protocol(),
+				"hostname":                 c.Hostname(),
+				"local_ip":                 c.IP(),
+				"user_agent":               c.Get("User-Agent"),
+				"x-forwarded-proto":        c.Get("X-Forwarded-Proto"),
+				"x-forwarded-for":          c.Get("X-Forwarded-For"),
+				"x-forwarded-host":         c.Get("X-Forwarded-Host"),
+				"x-real-ip":                c.Get("X-Real-IP"),
+				"x-original-forwarded-for": c.Get("X-Original-Forwarded-For"),
+				"cf-connecting-ip":         c.Get("CF-Connecting-IP"),
+				"method":                   c.Method(),
+				"path":                     c.Path(),
+			}).Info("Incoming Request - Reverse Proxy Headers Debug")
+		}
+		return c.Next()
+	})
+
 	// Device manager - needed for chatwoot webhook
 	dm := whatsapp.GetDeviceManager()
 
