@@ -20,6 +20,8 @@ ENV TZ=UTC
 WORKDIR /app
 # Copy compiled from builder.
 COPY --from=builder /app/whatsapp /app/whatsapp
+# Create required directories with proper permissions
+RUN mkdir -p /app/storages /app/statics && chmod 777 /app/storages
 # Run the binary.
 ENTRYPOINT ["/app/whatsapp"]
 
