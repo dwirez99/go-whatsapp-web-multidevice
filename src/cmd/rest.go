@@ -176,7 +176,20 @@ func restServer(_ *cobra.Command, _ []string) {
 	// Set auto reconnect checking with a guaranteed client instance
 	startAutoReconnectCheckerIfClientAvailable()
 
-	if err := app.Listen(config.AppHost + ":" + config.AppPort); err != nil {
+	// Build listen address
+	listenAddr := config.AppHost + ":" + config.AppPort
+	
+	// Log important startup information
+	logrus.WithFields(logrus.Fields{
+		"host":      config.AppHost,
+		"port":      config.AppPort,
+		"listen":    listenAddr,
+		"debug":     config.AppDebug,
+		"version":   config.AppVersion,
+		"basePath":  config.AppBasePath,
+	}).Info("Starting WhatsApp REST API Server")
+
+	if err := app.Listen(listenAddr); err != nil {
 		logrus.Fatalln("Failed to start: ", err.Error())
 	}
 }

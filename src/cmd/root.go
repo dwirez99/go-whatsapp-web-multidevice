@@ -87,6 +87,13 @@ func initEnvConfig() {
 	if envHost := viper.GetString("app_host"); envHost != "" {
 		config.AppHost = envHost
 	}
+	
+	// Ensure host is not localhost for Docker/container environments
+	// This is critical for reverse proxy access in Zeabur, Heroku, etc.
+	if config.AppHost == "localhost" || config.AppHost == "127.0.0.1" || config.AppHost == "[::1]" {
+		logrus.Warnf("Host is set to %s, changing to 0.0.0.0 for container compatibility", config.AppHost)
+		config.AppHost = "0.0.0.0"
+	}
 	if envDebug := viper.GetBool("app_debug"); envDebug {
 		config.AppDebug = envDebug
 	}
